@@ -59,6 +59,7 @@ services:
     image: ghcr.io/online-video-platform/adaptive-bitrate-proxy:main
     volumes:
       - ./nginx.conf:/etc/nginx/conf/nginx.conf
+      # /cached/transcoded_2895014537.mp4/index.m3u8
     ports:
       - "8091:80"
     restart: unless-stopped
