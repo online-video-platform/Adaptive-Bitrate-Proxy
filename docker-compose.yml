@@ -53,5 +53,12 @@ services:
       - /tmp/nginx/conf.d:rw,exec,nosuid,nodev,size=10M,uid=1014,gid=1014
     volumes:
       - ./var/cache/nginx/:/var/cache/nginx/
+    # ports:
+    #   - "8091:80"
+  adaptive-bitrate-proxy:
+    image: nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
     ports:
-      - "8091:80"
+      - "8092:80"
+    restart: unless-stopped
