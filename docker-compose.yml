@@ -56,7 +56,9 @@ services:
     # ports:
     #   - "8091:80"
   adaptive-bitrate-proxy:
-    image: nginx
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
     ports:
