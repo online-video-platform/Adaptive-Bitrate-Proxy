@@ -1,4 +1,3 @@
-# docker run -d -p 3001:3001 --name transcoder -e TARGET=http://nginx:80 -e CACHE_PATH=/cached -e PORT=3001 ghcr.io/online-video-platform/origin:main
 services:
   torrserver:
     image: ghcr.io/yourok/torrserver:latest
@@ -53,13 +52,9 @@ services:
       - /tmp/nginx/conf.d:rw,exec,nosuid,nodev,size=10M,uid=1014,gid=1014
     volumes:
       - ./var/cache/nginx/:/var/cache/nginx/
-    # ports:
-    #   - "8091:80"
+  # /cached/transcoded_2895014537.mp4/index.m3u8
   adaptive-bitrate-proxy:
     image: ghcr.io/online-video-platform/adaptive-bitrate-proxy:main
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf/nginx.conf
-      # /cached/transcoded_2895014537.mp4/index.m3u8
     ports:
       - "8091:80"
     restart: unless-stopped
