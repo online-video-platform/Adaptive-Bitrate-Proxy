@@ -70,7 +70,7 @@ RUN mkdir -p /etc/nginx/conf.d
 # COPY ./nginx .
 
 # Copy the Nginx configuration file
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf/nginx.conf
 
 # RUN nginx -g 'daemon off;'
 CMD ["nginx", "-g", "daemon off;"]
