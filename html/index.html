@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<div id="app">
+    <button @click="testMagnet('https://webtorrent.io/torrents/sintel.torrent')">Test Magnet</button>
+    <button @click="testMagnet('https://webtorrent.io/torrents/big-buck-bunny.torrent')">Test Magnet 2</button>
+    <button @click="testMagnet('https://webtorrent.io/torrents/tears-of-steel.torrent')">Test Magnet 3</button>
+    <button @click="testMagnet('https://webtorrent.io/torrents/cosmos-laundromat.torrent')">Test Magnet 4</button>
+    <button @click="testMagnet('https://webtorrent.io/torrents/wired-cd.torrent')">Test Magnet 5</button>
+    <textarea v-model="magnet_link" @input="updateLink" placeholder="Enter magnet link"></textarea>
+    <div v-if="streamUrl">
+        <video controls ref="video">
+            <source :src="streamUrl" type="application/x-mpegURL">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+</div>
+
+
+<script>
+    const { createApp, ref } = Vue
+
+    createApp({
+        setup() {
+            const message = ref('Hello vue!')
+            const magnet_link = ref('')
+            const file_stats = ref({})
+            const hash = ref('')
+            const torrentsList = ref([])
+            const streamUrl = ref('')
+            return {
+                torrentsList,
+                hash,
+                file_stats,
+                streamUrl,
+                magnet_link,
+                message
+            }
+        },
+        methods: {
+            testMagnet(magnet_link) {
+                this.magnet_link = magnet_link
+                this.updateLink()
+            },
+            async updateLink() {
+                let component = this
+                let response = await axios.post('/torrents', {
+                    action: 'add',
+                    link: this.magnet_link,
+                    title: '',
+                    category: '',
+                    poster: '',
+                    save_to_db: true
+                })
+                let hash = response.data.hash
+                component.hash = hash
+                let actionGet = await axios.post('/torrents', {
+                    action: 'get',
+                    hash: hash
+                });
+                // 
+                console.log(actionGet.data.file_stats);
+                component.file_stats = actionGet.data.file_stats
+                    .filter(file => file.length > 10_000_000) // > 10MB
+                    .filter(file => file.path.includes('.mp4') || file.path.includes('.mkv') || file.path.includes('.avi') || file.path.includes('.webm') || file.path.includes('.flv'))
+                    .map((file, index) => {
+                        let ext = file.path.split('.').pop()
+                        file.nice_filename = file.path.replace(/[^a-zA-Z0-9]/g, '_') + '.' + ext
+                        return file
+                    })
+                let firstFileStats = component.file_stats[0]
+                component.streamUrl = `/stream/${firstFileStats.nice_filename}?link=${hash}&index=${firstFileStats.id}&play&${new Date().getTime()}`
+                setTimeout(async () => {
+                    if (this.$refs.video) {
+                        this.$refs.video.load();
+                    } else {
+                        console.log('No video ref')
+                    }
+                }, 1000)
+            }
+        }
+    }).mount('#app')
+</script>
